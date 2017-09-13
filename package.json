@@ -4,11 +4,14 @@
   "description": "contract address and abi retreival service",
   "main": "index.js",
   "scripts": {
+    "start": "node ./server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bluebird": "^3.5.0",
+    "redis": "^2.8.0",
     "restify": "^5.2.0"
   }
 }
