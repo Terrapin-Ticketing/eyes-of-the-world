@@ -1,0 +1,14 @@
+{
+  "name": "eyes-of-the-world",
+  "version": "1.0.0",
+  "description": "contract address and abi retreival service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "restify": "^5.2.0"
+  }
+}
