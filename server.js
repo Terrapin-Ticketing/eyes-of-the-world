@@ -25,7 +25,6 @@ app.get('/terrapin-station', (req, res, next) => {
   client.getAsync('terrapin-station')
     .then((reply) => {
       if (!reply) return res.send(500, { msg: 'error getting contract information' });
-
       let contractInfo = JSON.parse(reply);
       res.send(contractInfo);
     })
@@ -34,7 +33,6 @@ app.get('/terrapin-station', (req, res, next) => {
 
 app.post('/terrapin-station', (req, res, next) => {
   let { abis, terrapinAddress } = req.body;
-
   client.setAsync('terrapin-station', JSON.stringify({
     abis,
     terrapinAddress
