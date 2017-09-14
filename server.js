@@ -38,42 +38,12 @@ app.post('/terrapin-station', (req, res, next) => {
     terrapinAddress
   }))
     .then(() => {
+      console.log('Upload Successful');
       res.send({ success: true });
       return next();
     });
 });
 
 app.listen(8000, () => {
-  console.log('%s listening at %s', 'Shakedown Street', '8080');
+  console.log('%s listening at %s', 'Eyes Of The World', '8000');
 });
-
-
-//
-// const client = require('./redis');
-//
-// let server = restify.createServer({
-//   name: 'eyes',
-//   version: '1.0.0'
-// });
-//
-// server.use(restify.plugins.acceptParser(server.acceptable));
-// server.use(restify.plugins.queryParser());
-// server.use(restify.plugins.bodyParser());
-//
-// server.use(restify.CORS({
-//
-//   // Defaults to ['*'].
-//   origins: ['*']
-//
-//   // Defaults to false.
-//   // credentials: true
-//
-//   // Sets expose-headers.
-//   // headers: ['x-foo']
-// }));
-//
-//
-//
-// server.listen(8000, () => {
-//   console.log('%s listening at %s', server.name, server.url);
-// });
