@@ -2,6 +2,7 @@ const express = require('express');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const config = require('config');
 
 const client = require('./redis');
 
@@ -19,7 +20,6 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Authorization, Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers');
   next();
 });
-
 
 app.get('/terrapin-station', (req, res, next) => {
   client.getAsync('terrapin-station')
@@ -44,6 +44,6 @@ app.post('/terrapin-station', (req, res, next) => {
     });
 });
 
-app.listen(8000, () => {
-  console.log('%s listening at %s', 'Eyes Of The World', '8000');
+app.listen(config.port, () => {
+  console.log('%s listening at %s', 'Eyes Of The World', config.port);
 });

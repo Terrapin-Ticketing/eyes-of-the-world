@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node ./server.js",
+    "demo": "NODE_ENV=demo node ./server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -12,6 +13,7 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "body-parser": "^1.18.1",
+    "config": "^1.26.2",
     "cookie-parser": "^1.4.3",
     "express": "^4.15.4",
     "helmet": "^3.8.1",
