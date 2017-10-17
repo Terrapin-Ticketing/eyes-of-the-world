@@ -1,4 +1,10 @@
 {
   "host": "localhost",
-  "port": 8000
+  "port": 8000,
+  "stripe": {
+    "secretKey": "sk_test_uKIHGA1q5UfwysISFvt6nHto"
+  },
+  "web3": {
+    "httpProvider": "http://localhost:8545"
+  }
 }

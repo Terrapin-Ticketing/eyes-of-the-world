@@ -4,8 +4,6 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const config = require('config');
 
-const client = require('./redis');
-
 let app = express();
 
 app.use(helmet());
@@ -21,28 +19,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get('/terrapin-station', (req, res, next) => {
-  client.getAsync('terrapin-station')
-    .then((reply) => {
-      if (!reply) return res.send(500, { msg: 'error getting contract information' });
-      let contractInfo = JSON.parse(reply);
-      res.send(contractInfo);
-    })
-    .then(() => next());
-});
-
-app.post('/terrapin-station', (req, res, next) => {
-  let { abis, terrapinAddress } = req.body;
-  client.setAsync('terrapin-station', JSON.stringify({
-    abis,
-    terrapinAddress
-  }))
-    .then(() => {
-      console.log('Upload Successful');
-      res.send({ success: true });
-      return next();
-    });
-});
+require('./routes')(app);
 
 app.listen(config.port, () => {
   console.log('%s listening at %s', 'Eyes Of The World', config.port);
