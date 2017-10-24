@@ -12,35 +12,32 @@ const gwei = 1000000000;
 
 module.exports = (app) => {
   app.post('/buy-ticket', async(req, res, next) => {
-    let { token, ticketAddress, walletAddress: userWallet } = req.body;
-    token = JSON.parse(token);
-
-    console.log('userWallet', userWallet);
-
-    // REDIS: get contract abies
-    let contractInfo;
     try {
+      let { token, ticketAddress, walletAddress: userWallet } = req.body;
+      token = JSON.parse(token);
+
+      console.log('userWallet', userWallet);
+
+      // REDIS: get contract abies
+      let contractInfo;
       let reply = await client.getAsync('terrapin-station');
       contractInfo = JSON.parse(JSON.parse(reply).abis);
-    } catch (e) {
-      console.error('Redis GET failed', e);
-    }
 
-    // STRIPE: charge
-    try {
+      // ETHEREUM: set new owner
+      let ticketInstance = new web3.eth.Contract(contractInfo.ticket.abi, ticketAddress);
+
+      console.log('ticket master:', await ticketInstance.methods.master().call());
+      console.log(wallet.address);
+
+
+      // STRIPE: charge
       await stripe.charges.create({
-        amount: 2000,
+        amount: await ticketInstance.methods.usdPrice().call(),
+        // amount: 2000,
         currency: 'usd',
         source: 'tok_visa', // token.card
         description: 'Charge for ethan.robinson@example.com'
       });
-    } catch (e) {
-      console.error('Stripe Charge Failed', e);
-    }
-
-    // ETHEREUM: set new owner
-    try {
-      let ticketInstance = new web3.eth.Contract(contractInfo.ticket.abi, ticketAddress);
 
       let oldOwner = await ticketInstance.methods.owner().call();
       console.log('oldOwner:', oldOwner);
@@ -75,13 +72,13 @@ module.exports = (app) => {
 
       let newOwner = await ticketInstance.methods.owner().call();
       console.log('newOwner:', newOwner);
-
+      // return
+      res.send('success');
     } catch (e) {
       console.log('Setting Owner failed', e);
+      res.send('failed');
     }
 
-    // return
-    res.send('success');
     next();
   });
 };
