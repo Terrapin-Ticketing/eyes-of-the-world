@@ -6,7 +6,6 @@ let client = require('../utils/redis');
 let web3 = require('../utils/web3');
 let wallet = require('../utils/wallet');
 
-
 const { secretKey } = config.stripe;
 const stripe = require('stripe')(secretKey);
 
@@ -18,8 +17,6 @@ module.exports = (app) => {
       let { token, ticketAddresses, walletAddress: userWallet, fees } = req.body;
       token = JSON.parse(token);
 
-      console.log('ticketAddresses', ticketAddresses);
-
       // REDIS: get contract abies
       let contractInfo;
       let reply = await client.getAsync('terrapin-station');
@@ -29,7 +26,8 @@ module.exports = (app) => {
       for (let i = 0; i < ticketAddresses.length; i++) {
         let ticketAddress = ticketAddresses[i];
         let ticketInstance = new web3.eth.Contract(contractInfo.ticket.abi, ticketAddress);
-        if (!(await ticketInstance.methods.isForSale().call())) throw Error('one or more of these tickets is not for sale');
+        let isForSale = await ticketInstance.methods.isForSale().call();
+        if (!isForSale) throw Error('one or more of these tickets is not for sale');
         let price = parseInt(await ticketInstance.methods.usdPrice().call());
         total += price;
       }
