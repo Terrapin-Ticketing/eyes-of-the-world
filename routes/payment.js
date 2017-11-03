@@ -29,8 +29,8 @@ module.exports = (app) => {
       for (let i = 0; i < ticketAddresses.length; i++) {
         let ticketAddress = ticketAddresses[i];
         let ticketInstance = new web3.eth.Contract(contractInfo.ticket.abi, ticketAddress);
-        if (await ticketInstance.method.isForSale().call()) throw Error('one or more of these tickets is not for sale');
-        let price = parseInt(await ticketInstance.method.usdPrice().call());
+        if (!(await ticketInstance.methods.isForSale().call())) throw Error('one or more of these tickets is not for sale');
+        let price = parseInt(await ticketInstance.methods.usdPrice().call());
         total += price;
       }
 
@@ -41,7 +41,7 @@ module.exports = (app) => {
         source: 'tok_visa', // token.card
         description: 'Charge for ethan.robinson@example.com'
       });
-
+      let transactionsList = [];
       await pasync.eachSeries(ticketAddresses, async(ticketAddress) => {
         // ETHEREUM: set new owner
         let ticketInstance = new web3.eth.Contract(contractInfo.ticket.abi, ticketAddress);
@@ -70,13 +70,13 @@ module.exports = (app) => {
         tx.sign(privateKeyBuffer);
         let serializedTx = tx.serialize();
 
-        await web3.eth.sendSignedTransaction(`0x${serializedTx.toString('hex')}`);
-
+        let transaction = await web3.eth.sendSignedTransaction(`0x${serializedTx.toString('hex')}`);
+        transactionsList.push(transaction);
         let newOwner = await ticketInstance.methods.owner().call();
         console.log('newOwner:', newOwner);
         // return
       });
-      res.send('success');
+      res.send(transactionsList);
     } catch (e) {
       console.log('Setting Owner failed', e);
       res.send('failed');
