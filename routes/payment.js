@@ -29,7 +29,8 @@ module.exports = (app) => {
       for (let i = 0; i < ticketAddresses.length; i++) {
         let ticketAddress = ticketAddresses[i];
         let ticketInstance = new web3.eth.Contract(contractInfo.ticket.abi, ticketAddress);
-        let price = parseInt(await ticketInstance.methods.usdPrice().call());
+        if (await ticketInstance.method.isForSale().call()) throw Error('one or more of these tickets is not for sale');
+        let price = parseInt(await ticketInstance.method.usdPrice().call());
         total += price;
       }
 
