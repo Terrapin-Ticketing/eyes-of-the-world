@@ -1,0 +1,12 @@
+
+
+{
+  "host": "localhost",
+  "port": 8080,
+  "stripe": {
+    "secretKey": "sk_test_uKIHGA1q5UfwysISFvt6nHto"
+  },
+  "web3": {
+    "httpProvider": "https://ropsten.infura.io/ErkMqD1W4xWqfkfqNBnt"
+  }
+}
