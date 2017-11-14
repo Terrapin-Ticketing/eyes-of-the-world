@@ -76,8 +76,7 @@ module.exports = (app) => {
       });
       res.send(transactionsList);
     } catch (e) {
-      console.log('Setting Owner failed', e);
-      res.send('failed');
+      res.status(500).send(e)
     }
     next();
   });
