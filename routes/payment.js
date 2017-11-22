@@ -12,9 +12,10 @@ const stripe = require('stripe')(secretKey);
 const gwei = 1000000000;
 
 module.exports = (app) => {
+  // app.post('/buy-ticket/:id')
   app.post('/buy-ticket', async(req, res, next) => {
     try {
-      let { token, ticketAddresses, walletAddress: userWallet, fees } = req.body;
+      let { token, walletAddress: userWallet, fees, qty, eventAddress } = req.body;
       token = JSON.parse(token);
 
       // REDIS: get contract abies
@@ -22,15 +23,14 @@ module.exports = (app) => {
       let reply = await client.getAsync('terrapin-station');
       contractInfo = JSON.parse(JSON.parse(reply).abis);
 
-      let total = 0 + fees;
-      for (let i = 0; i < ticketAddresses.length; i++) {
-        let ticketAddress = ticketAddresses[i];
-        let ticketInstance = new web3.eth.Contract(contractInfo.ticket.abi, ticketAddress);
-        let isForSale = await ticketInstance.methods.isForSale().call();
-        if (!isForSale) throw Error('one or more of these tickets is not for sale');
-        let price = parseInt(await ticketInstance.methods.usdPrice().call());
-        total += price;
-      }
+      let eventInstance = new web3.eth.Contract(contractInfo.event.abi, eventAddress);
+
+      // ensure there are still tickets available
+      let remainigTickets = await eventInstance.methods.getRemainingTickets().call();
+      if (qty > remainigTickets) throw new Error('No enough remaining tickets');
+
+      let price = parseInt(await eventInstance.methods.baseUSDPrice().call()) * qty;
+      let total = price + fees;
 
       // STRIPE: charge
       await stripe.charges.create({
@@ -39,24 +39,21 @@ module.exports = (app) => {
         source: 'tok_visa', // token.card
         description: 'Charge for ethan.robinson@example.com'
       });
+
+      // if payment is Successful
+      let encodedAbi = eventInstance.methods.printTicket(userWallet, web3.utils.fromAscii('GA')).encodeABI();
+      let nonce = await web3.eth.getTransactionCount(wallet.address);
+      let chainId = await web3.eth.net.getId();
+      let gas = `0x${(4700000).toString(16)}`;
+      let gasPrice = `0x${(gwei * 1).toString(16)}`;
+      // save ethereum tx hash
       let transactionsList = [];
-      await pasync.eachSeries(ticketAddresses, async(ticketAddress) => {
-        // ETHEREUM: set new owner
-        let ticketInstance = new web3.eth.Contract(contractInfo.ticket.abi, ticketAddress);
-
-        let oldOwner = await ticketInstance.methods.owner().call();
-        console.log('oldOwner:', oldOwner);
-
-        let nonce = await web3.eth.getTransactionCount(wallet.address);
-        let chainId = await web3.eth.net.getId();
-        let gas = `0x${(4700000).toString(16)}`;
-        let gasPrice = `0x${(gwei * 20).toString(16)}`;
-
-        let encodedAbi = ticketInstance.methods.masterBuy(userWallet).encodeABI();
+      // Print tickets
+      await pasync.eachSeries(Array(qty), async() => {
         let txParams = {
-          nonce,
+          nonce: nonce++,
           chainId,
-          to: ticketInstance.options.address,
+          to: eventInstance.options.address,
           value: 0,
           gas,
           gasPrice,
@@ -70,13 +67,11 @@ module.exports = (app) => {
 
         let transaction = await web3.eth.sendSignedTransaction(`0x${serializedTx.toString('hex')}`);
         transactionsList.push(transaction);
-        let newOwner = await ticketInstance.methods.owner().call();
-        console.log('newOwner:', newOwner);
-        // return
       });
       res.send(transactionsList);
     } catch (e) {
-      res.status(500).send(e)
+      console.log(e);
+      res.status(500).send(e);
     }
     next();
   });

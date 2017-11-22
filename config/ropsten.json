@@ -8,5 +8,6 @@
   },
   "web3": {
     "httpProvider": "https://ropsten.infura.io/ErkMqD1W4xWqfkfqNBnt"
-  }
+  },
+  "env": "ropsten"
 }

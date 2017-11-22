@@ -1,4 +1,5 @@
 const client = require('../utils/redis');
+const config = require('config');
 
 module.exports = (app) => {
   app.get('/terrapin-station', (req, res, next) => {
@@ -12,15 +13,20 @@ module.exports = (app) => {
   });
 
   app.post('/terrapin-station', (req, res, next) => {
-    let { abis, terrapinAddress } = req.body;
-    client.setAsync('terrapin-station', JSON.stringify({
-      abis,
-      terrapinAddress
-    }))
-      .then(() => {
-        console.log('Upload Successful');
-        res.send({ success: true });
-        return next();
-      });
+    // security check
+    console.log('before');
+    if (config.env === 'development') {
+      console.log('herer');
+      let { abis, terrapinAddress } = req.body;
+      client.setAsync('terrapin-station', JSON.stringify({
+        abis,
+        terrapinAddress
+      }))
+        .then(() => {
+          console.log('Upload Successful');
+          res.send({ success: true });
+          return next();
+        });
+    }
   });
 };
