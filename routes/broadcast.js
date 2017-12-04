@@ -15,10 +15,11 @@ module.exports = (app) => {
   app.post('/terrapin-station', (req, res, next) => {
     // security check
     // if (config.env === 'development') {
-    let { abis, terrapinAddress } = req.body;
+    let { abis, terrapinAddress, walletAddress } = req.body;
     client.setAsync('terrapin-station', JSON.stringify({
       abis,
-      terrapinAddress
+      terrapinAddress,
+      walletAddress
     }))
       .then(() => {
         console.log('Upload Successful');

@@ -29,7 +29,7 @@ module.exports = (app) => {
       let remainigTickets = await eventInstance.methods.getRemainingTickets().call();
       if (qty > remainigTickets) throw new Error('No enough remaining tickets');
 
-      let price = parseInt(await eventInstance.methods.baseUSDPrice().call()) * qty;
+      let price = parseInt(await eventInstance.methods.getTicketPrice('GA').call()) * qty;
       let total = price + fees;
 
       // STRIPE: charge
